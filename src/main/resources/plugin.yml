@@ -1,0 +1,28 @@
+name: AntiGriefingPlugin
+version: '${project.version}'
+main: com.hotamachi.antigriefingplugin.AntiGriefingPlugin
+api-version: 1.20
+commands:
+  trusttnt:
+    description: 追加/削除
+    usage: /trusttnt <add|remove> <player>
+    permission: trusttnt.manage
+  reload:
+    description: 設定ファイルをリロードします。
+    usage: /reload
+  toggleworld:
+    description: 個別ワールド別に設定します。
+    usage: /toggleworld <world>
+  allowplayer:
+    description: 個別に使用できる人を設定します。
+    usage: /allowplayer <add|remove> <player>
+permissions:
+  trusttnt.manage:
+    description: 管理権限
+    default: op
+  reload:
+    description: リロード権限
+    default: op
+  toggleworld:
+    description: ワールド別権限
+    default: op

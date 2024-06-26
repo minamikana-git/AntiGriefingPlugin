@@ -1,0 +1,40 @@
+settings:
+  enable-logging: true
+worlds:
+  world:
+    prevent-block-placement: true
+    blocked-items:
+      - TNT
+      - TNT_MINECART
+      - RESPAWN_ANCHOR
+      - END_CRYSTAL
+      - LAVA
+      - FIRE
+      - LAVA_BUCKET
+      - WATER_BUCKET
+      - WATER
+  world_nether:
+    prevent-block-placement: true
+    blocked-items:
+      - TNT
+      - TNT_MINECART
+      - RESPAWN_ANCHOR
+      - END_CRYSTAL
+      - LAVA
+      - FIRE
+      - LAVA_BUCKET
+      - WATER_BUCKET
+      - WATER
+  world_the_end:
+    prevent-block-placement: true
+    blocked-items:
+      - TNT
+      - TNT_MINECART
+      - RESPAWN_ANCHOR
+      - LAVA
+      - FIRE
+      - LAVA_BUCKET
+      -
+ban-reasons:
+  fire: "火打ち石を使用してブロックを燃やそうとしたためBANされました。" ##ここを変更
+  lava: "溶岩を使用したためBANされました。" ## ここを変更
