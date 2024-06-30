@@ -221,7 +221,7 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
             Bukkit.broadcastMessage(message);
             String reason = this.lavaBanReason;
             if (this.uuidManager != null) {
-                Punishment.create(player.getName(), this.uuidManager.getUUID(player.getName()), reason, "", PunishmentType.IP_BAN, -1L, (String)null, true);
+                Punishment.create(player.getName(), this.uuidManager.getUUID(player.getName()), reason, "CONSOLE", PunishmentType.IP_BAN, -1L, (String)null, false);
             } else {
                 this.getLogger().warning("UUIDManager is not initialized properly.");
             }
@@ -247,7 +247,7 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
                 Bukkit.broadcastMessage(message);
                 String reason = this.fireBanReason;
                 if (this.uuidManager != null) {
-                    Punishment.create(player.getName(), this.uuidManager.getUUID(player.getName()), reason, "", PunishmentType.BAN, -1L, (String)null, true);
+                    Punishment.create(player.getName(), this.uuidManager.getUUID(player.getName()), reason, "CONSOLE", PunishmentType.BAN, -1L, (String)null, false);
                 } else {
                     this.getLogger().warning("UUIDManager is not initialized properly.");
                 }
