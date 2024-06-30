@@ -13,6 +13,7 @@ worlds:
       - LAVA_BUCKET
       - WATER_BUCKET
       - WATER
+      - FLINT_AND_STEEL
   world_nether:
     prevent-block-placement: true
     blocked-items:

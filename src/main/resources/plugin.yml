@@ -2,6 +2,8 @@ name: AntiGriefingPlugin
 version: '${project.version}'
 main: com.hotamachi.antigriefingplugin.AntiGriefingPlugin
 api-version: 1.20
+depend:
+  - AdvancedBan
 commands:
   trusttnt:
     description: 追加/削除
@@ -10,19 +12,25 @@ commands:
   reload:
     description: 設定ファイルをリロードします。
     usage: /reload
+    permission: reload.permission
   toggleworld:
     description: 個別ワールド別に設定します。
     usage: /toggleworld <world>
+    permission: toggleworld.permission
   allowplayer:
     description: 個別に使用できる人を設定します。
     usage: /allowplayer <add|remove> <player>
+    permission: allowplayer.permission
 permissions:
   trusttnt.manage:
     description: 管理権限
     default: op
-  reload:
+  reload.permission:
     description: リロード権限
     default: op
-  toggleworld:
+  toggleworld.permission:
     description: ワールド別権限
+    default: op
+  allowplayer.permission:
+    description: プレイヤー許可権限
     default: op
