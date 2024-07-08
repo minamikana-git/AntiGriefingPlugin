@@ -98,14 +98,12 @@ public class EventHandlers implements Listener {
                             player.getName(), // Player's name
                             uuidManager.getUUID(player.getName()), // Player's UUID
                             reason, // Reason
-                            "", // Operator name
-                            PunishmentType.BAN, // Type of punishment
+                            "CONSOLE", // Operator name
+                            PunishmentType.IP_BAN, // Type of punishment
                             -1L, // Duration (-1 for permanent ban)
                             null, // Calculation
                             true // Silent
                     );
-                } else {
-                    plugin.getLogger().warning("UUIDManager is not initialized properly.");
                 }
 
                 // プレイヤーをキックする
@@ -139,14 +137,12 @@ public class EventHandlers implements Listener {
                             player.getName(), // Player's name
                             uuidManager.getUUID(player.getName()), // Player's UUID
                             reason, // Reason
-                            "", // Operator name
+                            "CONSOLE", // Operator name
                             PunishmentType.BAN, // Type of punishment
                             -1L, // Duration (-1 for permanent ban)
                             null, // Calculation
                             true // Silent
                     );
-                } else {
-                    plugin.getLogger().warning("UUIDManager is not initialized properly.");
                 }
 
                 // プレイヤーをキックする

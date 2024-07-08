@@ -62,7 +62,8 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
         if (advancedBan != null && advancedBan.isEnabled()) {
             this.uuidManager = UUIDManager.get();
         } else {
-            this.getLogger().warning("AdvancedBan plugin not found or not enabled!");
+            this.getLogger().warning("AdvancedBan プラグインがないか無効化されています。");
+            this.getServer().getPluginManager().disablePlugin(this);
         }
 
     }
