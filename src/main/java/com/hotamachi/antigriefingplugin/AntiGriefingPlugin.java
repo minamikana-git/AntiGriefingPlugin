@@ -223,8 +223,6 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
             String reason = this.lavaBanReason;
             if (this.uuidManager != null) {
                 Punishment.create(player.getName(), this.uuidManager.getUUID(player.getName()), reason, "CONSOLE", PunishmentType.IP_BAN, -1L, (String)null, false);
-            } else {
-                this.getLogger().warning("UUIDManager is not initialized properly.");
             }
 
             player.kickPlayer(reason);
@@ -249,8 +247,6 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
                 String reason = this.fireBanReason;
                 if (this.uuidManager != null) {
                     Punishment.create(player.getName(), this.uuidManager.getUUID(player.getName()), reason, "CONSOLE", PunishmentType.BAN, -1L, (String)null, false);
-                } else {
-                    this.getLogger().warning("UUIDManager is not initialized properly.");
                 }
 
                 player.kickPlayer(reason);
