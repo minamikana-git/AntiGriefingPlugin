@@ -22,6 +22,10 @@ commands:
     description: 個別に使用できる人を設定します。
     usage: /allowplayer <add|remove> <player>
     permission: allowplayer.permission
+  toggleantigrief:
+    description: ゲーム内でプラグインの有効化と無効化を切替します。
+    usage: /toggleantigrief
+    permission: toggleantigrief.permission
 permissions:
   trusttnt.manage:
     description: 管理権限
@@ -34,4 +38,7 @@ permissions:
     default: op
   allowplayer.permission:
     description: プレイヤー許可権限
+    default: op
+  toggleantigrief.permission:
+    description: 切替権限
     default: op
