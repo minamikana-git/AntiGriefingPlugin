@@ -1,12 +1,14 @@
 package com.hotamachi.antigriefingplugin;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.leoko.advancedban.utils.Punishment;
 import me.leoko.advancedban.utils.PunishmentType;
@@ -24,6 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.world.WorldLoadEvent;
@@ -32,305 +35,294 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecutor {
-
-    // Variables for managing trusted players, UUID manager, and ban reasons
-    private Set<UUID> trustedPlayers = new HashSet<>();
+    private Set<UUID> trustedPlayers = new HashSet();
     private UUIDManager uuidManager;
     private String fireBanReason;
     private String lavaBanReason;
     private boolean pluginEnabled = true;
 
-
-
-    // Accessor for trusted players
-    public Set<UUID> getTrustedPlayers() {
-        return trustedPlayers;
+    public AntiGriefingPlugin() {
     }
 
-    // Plugin enable logic
-    @Override
+    public Set<UUID> getTrustedPlayers() {
+        return this.trustedPlayers;
+    }
+
     public void onEnable() {
-        // Load configuration
-        if (!(new File(getDataFolder(), "config.yml")).exists()) {
-            saveDefaultConfig();
+        if (!(new File(this.getDataFolder(), "config.yml")).exists()) {
+            this.saveDefaultConfig();
         }
-        loadConfiguration();
-        getLogger().info("[!] チート対策プラグインを有効化しています。");
 
-        // Register events and commands
-        getServer().getPluginManager().registerEvents(this, this);
-        registerCommands();
-
-        // Set ban reasons from config
-        fireBanReason = getConfig().getString("ban-reasons.fire", "火打ち石を使用してブロックを燃やそうとしたためBANされました。");
-        lavaBanReason = getConfig().getString("ban-reasons.lava", "マグマを使用したためBANされました。");
-
-        // Check for AdvancedBan plugin
+        this.loadConfiguration();
+        this.getLogger().info("[!] チート対策プラグインを有効化しています。");
+        this.getServer().getPluginManager().registerEvents(this, this);
+        this.registerCommands();
+        this.fireBanReason = this.getConfig().getString("ban-reasons.fire", "火打ち石を使用してブロックを燃やそうとしたためBANされました。");
+        this.lavaBanReason = this.getConfig().getString("ban-reasons.lava", "マグマを使用したためBANされました。");
         Plugin advancedBan = Bukkit.getPluginManager().getPlugin("AdvancedBan");
         if (advancedBan != null && advancedBan.isEnabled()) {
-            uuidManager = UUIDManager.get();
+            this.uuidManager = UUIDManager.get();
         } else {
-            getLogger().warning("AdvancedBan プラグインがないか無効化されています。");
-            getServer().getPluginManager().disablePlugin(this);
+            this.getLogger().warning("AdvancedBan プラグインがないか無効化されています。");
+            this.getServer().getPluginManager().disablePlugin(this);
         }
+
     }
 
-    // Plugin disable logic
-    @Override
     public void onDisable() {
-        getLogger().info("[!] チート対策プラグインを無効化しています。");
+        this.getLogger().info("[!] チート対策プラグインを無効化しています。");
     }
 
-    // Register commands
     private void registerCommands() {
-        getCommand("trusttnt").setExecutor(this);
-        getCommand("trusttnt").setTabCompleter(this);
-        getCommand("reload").setExecutor(this);
-        getCommand("reload").setTabCompleter(this);
-        getCommand("toggleworld").setExecutor(this);
-        getCommand("toggleworld").setTabCompleter(this);
-        getCommand("allowplayer").setExecutor(this);
-        getCommand("allowplayer").setTabCompleter(this);
-        getCommand("toggleantigrief").setExecutor(this);
-        getCommand("toggleantigrief").setTabCompleter(this);
+        this.getCommand("trusttnt").setExecutor(this);
+        this.getCommand("trusttnt").setTabCompleter(this);
+        this.getCommand("reload").setExecutor(this);
+        this.getCommand("reload").setTabCompleter(this);
+        this.getCommand("toggleworld").setExecutor(this);
+        this.getCommand("toggleworld").setTabCompleter(this);
+        this.getCommand("allowplayer").setExecutor(this);
+        this.getCommand("allowplayer").setTabCompleter(this);
+        this.getCommand("toggleantigrief").setExecutor(this);
+        this.getCommand("toggleantigrief").setTabCompleter(this);
     }
 
-    // Command handling
-    @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         switch (command.getName().toLowerCase()) {
             case "trusttnt":
-                return handleTrustTntCommand(sender, args);
+                return this.handleTrustTntCommand(sender, args);
             case "reload":
-                reloadConfig();
-                loadConfiguration();
+                this.reloadConfig();
+                this.loadConfiguration();
                 sender.sendMessage("§a設定ファイルが再読み込みされました。");
                 return true;
             case "toggleworld":
-                return handleToggleWorldCommand(sender, args);
+                return this.handleToggleWorldCommand(sender, args);
             case "allowplayer":
-                return handleAllowPlayerCommand(sender, args);
+                return this.handleAllowPlayerCommand(sender, args);
             case "toggleantigrief":
-                return handleToggleAntiGriefCommand(sender);
+                return this.handleToggleAntiGriefCommand(sender);
             default:
                 return false;
         }
     }
 
-    // Handle /trusttnt command
     private boolean handleTrustTntCommand(CommandSender sender, String[] args) {
         if (args.length != 2) {
             sender.sendMessage("使用方法: /trusttnt <add|remove> <player>");
             return true;
-        }
-
-        Player target = Bukkit.getPlayer(args[1]);
-        if (target == null) {
-            sender.sendMessage("プレイヤーが見つかりません");
-            return true;
-        }
-
-        UUID targetUUID = target.getUniqueId();
-        if (args[0].equalsIgnoreCase("add")) {
-            trustedPlayers.add(targetUUID);
-            sender.sendMessage(target.getName() + " はTNTを使用できるようになりました。");
-        } else if (args[0].equalsIgnoreCase("remove")) {
-            trustedPlayers.remove(targetUUID);
-            sender.sendMessage(target.getName() + " はTNTを使用できません。");
         } else {
-            sender.sendMessage("使用方法: /trusttnt <add|remove> <player>");
-        }
+            Player target = Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                sender.sendMessage("プレイヤーが見つかりません");
+                return true;
+            } else {
+                UUID targetUUID = target.getUniqueId();
+                if (args[0].equalsIgnoreCase("add")) {
+                    this.trustedPlayers.add(targetUUID);
+                    sender.sendMessage(target.getName() + " はTNTを使用できるようになりました。");
+                } else if (args[0].equalsIgnoreCase("remove")) {
+                    this.trustedPlayers.remove(targetUUID);
+                    sender.sendMessage(target.getName() + " はTNTを使用できません。");
+                } else {
+                    sender.sendMessage("使用方法: /trusttnt <add|remove> <player>");
+                }
 
-        return true;
+                return true;
+            }
+        }
     }
 
-    // Handle /toggleworld command
     private boolean handleToggleWorldCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
             sender.sendMessage("§c使用方法: /toggleworld <world>");
             return false;
+        } else {
+            String worldName = args[0];
+            FileConfiguration config = this.getConfig();
+            if (!config.contains("worlds." + worldName)) {
+                sender.sendMessage("§cワールド " + worldName + " は存在しません。");
+                return false;
+            } else {
+                boolean currentSetting = config.getBoolean("worlds." + worldName + ".prevent-block-placement");
+                config.set("worlds." + worldName + ".prevent-block-placement", !currentSetting);
+                this.saveConfig();
+                sender.sendMessage("§aワールド " + worldName + " のブロック設置防止機能を " + (!currentSetting ? "有効" : "無効") + " に切り替えました。");
+                return true;
+            }
         }
-
-        String worldName = args[0];
-        FileConfiguration config = getConfig();
-        if (!config.contains("worlds." + worldName)) {
-            sender.sendMessage("§cワールド " + worldName + " は存在しません。");
-            return false;
-        }
-
-        boolean currentSetting = config.getBoolean("worlds." + worldName + ".prevent-block-placement");
-        config.set("worlds." + worldName + ".prevent-block-placement", !currentSetting);
-        saveConfig();
-
-        sender.sendMessage("§aワールド " + worldName + " のブロック設置防止機能を " + (!currentSetting ? "有効" : "無効") + " に切り替えました。");
-        return true;
     }
 
-    // Handle /allowplayer command
     private boolean handleAllowPlayerCommand(CommandSender sender, String[] args) {
         if (args.length != 2) {
             sender.sendMessage("使用方法: /allowplayer <add|remove> <player>");
             return true;
-        }
-
-        String action = args[0];
-        String playerName = args[1];
-        List<String> allowedPlayers = getConfig().getStringList("allowed-players");
-
-        if (action.equalsIgnoreCase("add")) {
-            if (!allowedPlayers.contains(playerName)) {
-                allowedPlayers.add(playerName);
-                getConfig().set("allowed-players", allowedPlayers);
-                saveConfig();
-                sender.sendMessage(playerName + " を使用可能プレイヤーリストに追加しました。");
-            } else {
-                sender.sendMessage(playerName + " はすでに使用可能プレイヤーリストに追加されています。");
-            }
-        } else if (action.equalsIgnoreCase("remove")) {
-            if (allowedPlayers.contains(playerName)) {
-                allowedPlayers.remove(playerName);
-                getConfig().set("allowed-players", allowedPlayers);
-                saveConfig();
-                sender.sendMessage(playerName + " を使用可能プレイヤーリストから削除しました。");
-            } else {
-                sender.sendMessage(playerName + " は使用可能プレイヤーリストに含まれていません。");
-            }
         } else {
-            sender.sendMessage("使用方法: /allowplayer <add|remove> <player>");
+            String action = args[0];
+            String playerName = args[1];
+            List<String> allowedPlayers = this.getConfig().getStringList("allowed-players");
+            if (action.equalsIgnoreCase("add")) {
+                if (!allowedPlayers.contains(playerName)) {
+                    allowedPlayers.add(playerName);
+                    this.getConfig().set("allowed-players", allowedPlayers);
+                    this.saveConfig();
+                    sender.sendMessage(playerName + " を使用可能プレイヤーリストに追加しました。");
+                } else {
+                    sender.sendMessage(playerName + " はすでに使用可能プレイヤーリストに追加されています。");
+                }
+            } else if (action.equalsIgnoreCase("remove")) {
+                if (allowedPlayers.contains(playerName)) {
+                    allowedPlayers.remove(playerName);
+                    this.getConfig().set("allowed-players", allowedPlayers);
+                    this.saveConfig();
+                    sender.sendMessage(playerName + " を使用可能プレイヤーリストから削除しました。");
+                } else {
+                    sender.sendMessage(playerName + " は使用可能プレイヤーリストに含まれていません。");
+                }
+            } else {
+                sender.sendMessage("使用方法: /allowplayer <add|remove> <player>");
+            }
+
+            return true;
         }
-
-        return true;
     }
 
-    // Handle /toggleantigrief command
     private boolean handleToggleAntiGriefCommand(CommandSender sender) {
-        pluginEnabled = !pluginEnabled;
-        sender.sendMessage("荒らし対策プラグインが " + (pluginEnabled ? "有効" : "無効") + " になりました。");
+        this.pluginEnabled = !this.pluginEnabled;
+        sender.sendMessage("荒らし対策プラグインが " + (this.pluginEnabled ? "有効" : "無効") + " になりました。");
         return true;
     }
 
-    // Event handlers
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
-        if (!pluginEnabled) return;
-        Player player = event.getPlayer();
-        ItemStack item = event.getItem().getItemStack();
-        if (item.getType() == Material.TNT && !trustedPlayers.contains(player.getUniqueId())) {
-            event.setCancelled(true);
-            event.getItem().remove();
-            player.getInventory().addItem(new ItemStack(Material.SAND, 4));
-            player.getInventory().addItem(new ItemStack(Material.GUNPOWDER, 5));
-            player.sendMessage("TNTの所有は禁止されています。材料に変換しました。");
+        if (this.pluginEnabled) {
+            Player player = event.getPlayer();
+            ItemStack item = event.getItem().getItemStack();
+            if (item.getType() == Material.TNT && !this.trustedPlayers.contains(player.getUniqueId())) {
+                event.setCancelled(true);
+                event.getItem().remove();
+                player.getInventory().addItem(new ItemStack[]{new ItemStack(Material.SAND, 4)});
+                player.getInventory().addItem(new ItemStack[]{new ItemStack(Material.GUNPOWDER, 5)});
+                player.sendMessage("TNTの所有は禁止されています。材料に変換しました。");
+            }
+
         }
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (!pluginEnabled) return;
-        Player player = event.getPlayer();
-        String worldName = player.getWorld().getName();
-        Material placedType = event.getBlock().getType();
-        Set<String> blockedItems = getConfig().getStringList("blocked-items").stream().collect(Collectors.toSet());
+        if (this.pluginEnabled) {
+            Player player = event.getPlayer();
+            String worldName = player.getWorld().getName();
+            Material placedType = event.getBlock().getType();
+            Set<String> blockedItems = (Set)this.getConfig().getStringList("blocked-items").stream().collect(Collectors.toSet());
+            if (this.getConfig().getBoolean("worlds." + worldName + ".prevent-block-placement", false) && !blockedItems.contains(placedType.toString())) {
+                event.setCancelled(true);
+                player.sendMessage("§cこのワールドではブロックの設置が許可されていません！");
+            }
 
-        if (getConfig().getBoolean("worlds." + worldName + ".prevent-block-placement", false) && !blockedItems.contains(placedType.toString())) {
-            event.setCancelled(true);
-            player.sendMessage("§cこのワールドではブロックの設置が許可されていません！");
         }
     }
 
     @EventHandler
     public void onBlockIgnite(BlockIgniteEvent event) {
-        if (!pluginEnabled) return;
-        if (event.getCause() == BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL) {
-            Player player = event.getPlayer();
-            String reason = fireBanReason;
-            if (player != null && !trustedPlayers.contains(player.getUniqueId())) {
-                event.setCancelled(true);
-                player.sendMessage("§c火打石の使用は禁止されています！");
-                banPlayer(player, fireBanReason);
-            player.banPlayer(reason);
+        if (this.pluginEnabled) {
+            if (event.getCause() == IgniteCause.FLINT_AND_STEEL) {
+                Player player = event.getPlayer();
+                String reason = this.fireBanReason;
+                if (player != null && !this.trustedPlayers.contains(player.getUniqueId())) {
+                    event.setCancelled(true);
+                    player.sendMessage("§c火打石の使用は禁止されています！");
+                    this.banPlayer(player, this.fireBanReason);
+                    player.banPlayer(reason);
+                }
             }
+
         }
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (!pluginEnabled) return;
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Player player = event.getPlayer();
-            ItemStack item = event.getItem();
-            Block block = event.getClickedBlock();
-            BlockFace face = event.getBlockFace();
-            if (item != null && item.getType() == Material.LAVA_BUCKET && block != null) {
-                Block placedBlock = block.getRelative(face);
-                if (placedBlock.getType() == Material.AIR) {
-                    event.setCancelled(true);
-                    String reason = lavaBanReason;
-                    player.sendMessage("§cこのエリアではマグマの使用は禁止されています！");
-                    banPlayer(player, lavaBanReason);
-                player.banPlayer(reason);
+        if (this.pluginEnabled) {
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                Player player = event.getPlayer();
+                ItemStack item = event.getItem();
+                Block block = event.getClickedBlock();
+                BlockFace face = event.getBlockFace();
+                if (item != null && item.getType() == Material.LAVA_BUCKET && block != null) {
+                    Block placedBlock = block.getRelative(face);
+                    if (placedBlock.getType() == Material.AIR) {
+                        event.setCancelled(true);
+                        String reason = this.lavaBanReason;
+                        player.sendMessage("§cこのエリアではマグマの使用は禁止されています！");
+                        this.banPlayer(player, this.lavaBanReason);
+                        player.banPlayer(reason);
+                    }
                 }
             }
+
         }
     }
 
     @EventHandler
     public void onWorldLoad(WorldLoadEvent event) {
-        getLogger().info("ワールド " + event.getWorld().getName() + " が読み込まれました。");
+        this.getLogger().info("ワールド " + event.getWorld().getName() + " が読み込まれました。");
     }
 
-    // Utility methods
     public void loadConfiguration() {
-        trustedPlayers.clear();
-        List<String> trustedPlayersList = getConfig().getStringList("trusted-players");
-        for (String uuidString : trustedPlayersList) {
+        this.trustedPlayers.clear();
+        List<String> trustedPlayersList = this.getConfig().getStringList("trusted-players");
+        Iterator var2 = trustedPlayersList.iterator();
+
+        while(var2.hasNext()) {
+            String uuidString = (String)var2.next();
+
             try {
-                trustedPlayers.add(UUID.fromString(uuidString));
-            } catch (IllegalArgumentException e) {
-                getLogger().warning("無効な UUID: " + uuidString);
+                this.trustedPlayers.add(UUID.fromString(uuidString));
+            } catch (IllegalArgumentException var5) {
+                this.getLogger().warning("無効な UUID: " + uuidString);
             }
         }
+
     }
 
     private void banPlayer(Player player, String reason) {
-        if (uuidManager != null) {
-            // プレイヤーのUUIDを取得
-            String uuid = uuidManager.getUUID(player.getName());
-
-            // Punishmentオブジェクトの作成と適用
+        if (this.uuidManager != null) {
+            String uuid = this.uuidManager.getUUID(player.getName());
             Punishment.create(player.getName(), uuid, reason, "CONSOLE", PunishmentType.BAN, -1L, (String)null, false);
-
-            // プレイヤーがオンラインの場合は強制的に切断
             if (player.isOnline()) {
                 player.kickPlayer(reason);
             }
 
-            // コンソールに通知
-            getLogger().info(player.getName() + " がバンされました: " + reason);
+            Logger var10000 = this.getLogger();
+            String var10001 = player.getName();
+            var10000.info(var10001 + " がバンされました: " + reason);
         }
+
     }
 
-
-
-    @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        List<String> suggestions = new ArrayList<>();
+        List<String> suggestions = new ArrayList();
         if (command.getName().equalsIgnoreCase("trusttnt") || command.getName().equalsIgnoreCase("allowplayer")) {
             if (args.length == 1) {
                 if ("add".startsWith(args[0].toLowerCase())) {
                     suggestions.add("add");
                 }
+
                 if ("remove".startsWith(args[0].toLowerCase())) {
                     suggestions.add("remove");
                 }
             } else if (args.length == 2) {
-                for (Player player : Bukkit.getOnlinePlayers()) {
+                Iterator var6 = Bukkit.getOnlinePlayers().iterator();
+
+                while(var6.hasNext()) {
+                    Player player = (Player)var6.next();
                     if (player.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
                         suggestions.add(player.getName());
                     }
                 }
             }
         }
+
         return suggestions;
     }
 }
