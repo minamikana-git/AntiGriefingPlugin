@@ -210,16 +210,21 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (this.pluginEnabled) {
-            Player player = event.getPlayer();
-            String worldName = player.getWorld().getName();
-            Material placedType = event.getBlock().getType();
-            Set<String> blockedItems = (Set)this.getConfig().getStringList("blocked-items").stream().collect(Collectors.toSet());
-            if (this.getConfig().getBoolean("worlds." + worldName + ".prevent-block-placement", false) && !blockedItems.contains(placedType.toString())) {
-                event.setCancelled(true);
-                player.sendMessage("§cこのワールドではブロックの設置が許可されていません！");
-            }
+        if (!this.pluginEnabled) {
+            return; // プラグインが無効化されている場合、処理をスキップする
+        }
 
+        Player player = event.getPlayer();
+        String worldName = player.getWorld().getName();
+        Material placedType = event.getBlock().getType();
+        Set<String> blockedItems = new HashSet<>(this.getConfig().getStringList("blocked-items"));
+
+        boolean isBlockPlacementPrevented = this.getConfig().getBoolean("worlds." + worldName + ".prevent-block-placement", false);
+        boolean isBlockedItem = blockedItems.contains(placedType.toString());
+
+        if (isBlockPlacementPrevented && isBlockedItem) {
+            event.setCancelled(true);
+            player.sendMessage("§cこのワールドでは、このブロックの設置が許可されていません！");
         }
     }
 
