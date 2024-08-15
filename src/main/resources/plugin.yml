@@ -1,8 +1,8 @@
 name: AntiGriefingPlugin
 version: '${project.version}'
 main: com.hotamachi.antigriefingplugin.AntiGriefingPlugin
-api-version: 1.20
-author: hotamachisubaru
+api-version: 1.21
+author: hotamachisubaru 2024
 depend:
   - AdvancedBan
 commands:
