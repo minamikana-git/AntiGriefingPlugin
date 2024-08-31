@@ -9,6 +9,7 @@ import me.leoko.advancedban.manager.UUIDManager;
 import me.leoko.advancedban.utils.Punishment;
 import me.leoko.advancedban.utils.PunishmentType;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -83,7 +84,7 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
             case "reload":
                 reloadConfig();
                 loadConfiguration();
-                sender.sendMessage("§a設定ファイルが再読み込みされました。");
+                sender.sendMessage(ChatColor.GREEN + "設定ファイルが再読み込みされました。");
                 return true;
             case "toggleworld":
                 return handleToggleWorldCommand(sender, args);
@@ -98,25 +99,25 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
 
     private boolean handleTrustTntCommand(CommandSender sender, String[] args) {
         if (args.length != 2) {
-            sender.sendMessage("使用方法: /trusttnt <add|remove> <player>");
+            sender.sendMessage(ChatColor.YELLOW + "使用方法: /trusttnt <add|remove> <player>");
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            sender.sendMessage("プレイヤーが見つかりません");
+            sender.sendMessage(ChatColor.RED + "プレイヤーが見つかりません。");
             return true;
         }
 
         UUID targetUUID = target.getUniqueId();
         if (args[0].equalsIgnoreCase("add")) {
             trustedPlayers.add(targetUUID);
-            sender.sendMessage(target.getName() + " はTNTを使用できるようになりました。");
+            sender.sendMessage(ChatColor.GREEN + target.getName() + " はTNTを使用できるようになりました。");
         } else if (args[0].equalsIgnoreCase("remove")) {
             trustedPlayers.remove(targetUUID);
-            sender.sendMessage(target.getName() + " はTNTを使用できません。");
+            sender.sendMessage(ChatColor.RED + target.getName() + " はTNTを使用できません。");
         } else {
-            sender.sendMessage("使用方法: /trusttnt <add|remove> <player>");
+            sender.sendMessage(ChatColor.YELLOW + "使用方法: /trusttnt <add|remove> <player>");
         }
 
         return true;
@@ -124,27 +125,27 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
 
     private boolean handleToggleWorldCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("§c使用方法: /toggleworld <world>");
+            sender.sendMessage(ChatColor.YELLOW + "§c使用方法: /toggleworld <world>");
             return false;
         }
 
         String worldName = args[0];
         FileConfiguration config = getConfig();
         if (!config.contains("worlds." + worldName)) {
-            sender.sendMessage("§cワールド " + worldName + " は存在しません。");
+            sender.sendMessage(ChatColor.RED + "ワールド " + worldName + " は存在しません。");
             return false;
         }
 
         boolean currentSetting = config.getBoolean("worlds." + worldName + ".prevent-block-placement");
         config.set("worlds." + worldName + ".prevent-block-placement", !currentSetting);
         saveConfig();
-        sender.sendMessage("§aワールド " + worldName + " のブロック設置防止機能を " + (!currentSetting ? "有効" : "無効") + " に切り替えました。");
+        sender.sendMessage(ChatColor.GREEN + "ワールド " + worldName + " のブロック設置防止機能を " + (!currentSetting ? "有効" : "無効") + " に切り替えました。");
         return true;
     }
 
     private boolean handleAllowPlayerCommand(CommandSender sender, String[] args) {
         if (args.length != 2) {
-            sender.sendMessage("使用方法: /allowplayer <add|remove> <player>");
+            sender.sendMessage(ChatColor.YELLOW + "使用方法: /allowplayer <add|remove> <player>");
             return true;
         }
 
@@ -156,21 +157,21 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
                 allowedPlayers.add(playerName);
                 getConfig().set("allowed-players", allowedPlayers);
                 saveConfig();
-                sender.sendMessage(playerName + " を使用可能プレイヤーリストに追加しました。");
+                sender.sendMessage(ChatColor.GREEN + playerName + " を使用可能プレイヤーリストに追加しました。");
             } else {
-                sender.sendMessage(playerName + " はすでに使用可能プレイヤーリストに追加されています。");
+                sender.sendMessage(ChatColor.YELLOW + playerName + " はすでに使用可能プレイヤーリストに追加されています。");
             }
         } else if (action.equalsIgnoreCase("remove")) {
             if (allowedPlayers.contains(playerName)) {
                 allowedPlayers.remove(playerName);
                 getConfig().set("allowed-players", allowedPlayers);
                 saveConfig();
-                sender.sendMessage(playerName + " を使用可能プレイヤーリストから削除しました。");
+                sender.sendMessage(ChatColor.GREEN + playerName + " を使用可能プレイヤーリストから削除しました。");
             } else {
-                sender.sendMessage(playerName + " は使用可能プレイヤーリストに含まれていません。");
+                sender.sendMessage(ChatColor.RED + playerName + " は使用可能プレイヤーリストに含まれていません。");
             }
         } else {
-            sender.sendMessage("使用方法: /allowplayer <add|remove> <player>");
+            sender.sendMessage(ChatColor.YELLOW + "使用方法: /allowplayer <add|remove> <player>");
         }
 
         return true;
@@ -178,7 +179,7 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
 
     private boolean handleToggleAntiGriefCommand(CommandSender sender) {
         pluginEnabled = !pluginEnabled;
-        sender.sendMessage("荒らし対策プラグインが " + (pluginEnabled ? "有効" : "無効") + " になりました。");
+        sender.sendMessage(ChatColor.GREEN + "荒らし対策プラグインが " + (pluginEnabled ? "有効" : "無効") + " になりました。");
         return true;
     }
 
@@ -193,7 +194,7 @@ public class AntiGriefingPlugin extends JavaPlugin implements Listener, TabExecu
             event.getItem().remove();
             player.getInventory().addItem(new ItemStack(Material.SAND, 4));
             player.getInventory().addItem(new ItemStack(Material.GUNPOWDER, 5));
-            player.sendMessage("TNTの所有は禁止されています。材料に変換しました。");
+            player.sendMessage(ChatColor.YELLOW + "TNTの所有は禁止されています。材料に変換しました。");
         }
     }
 
