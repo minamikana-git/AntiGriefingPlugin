@@ -6,10 +6,6 @@ author: hotamachisubaru 2024
 depend:
   - AdvancedBan
 commands:
-  trusttnt:
-    description: 追加/削除
-    usage: /trusttnt <add|remove> <player>
-    permission: trusttnt.manage
   reload:
     description: 設定ファイルをリロードします。
     usage: /reload
@@ -18,26 +14,16 @@ commands:
     description: 個別ワールド別に設定します。
     usage: /toggleworld <world>
     permission: toggleworld.permission
-  allowplayer:
-    description: 個別に使用できる人を設定します。
-    usage: /allowplayer <add|remove> <player>
-    permission: allowplayer.permission
   toggleantigrief:
     description: ゲーム内でプラグインの有効化と無効化を切替します。
     usage: /toggleantigrief
     permission: toggleantigrief.permission
 permissions:
-  trusttnt.manage:
-    description: 管理権限
-    default: op
   reload.permission:
     description: リロード権限
     default: op
   toggleworld.permission:
     description: ワールド別権限
-    default: op
-  allowplayer.permission:
-    description: プレイヤー許可権限
     default: op
   toggleantigrief.permission:
     description: 切替権限
