@@ -17,14 +17,10 @@ commands:
   toggleantigrief:
     description: ゲーム内でプラグインの有効化と無効化を切替します。
     usage: /toggleantigrief
-    permission: toggleantigrief.permission
 permissions:
   reload.permission:
     description: リロード権限
     default: op
   toggleworld.permission:
     description: ワールド別権限
-    default: op
-  toggleantigrief.permission:
-    description: 切替権限
     default: op

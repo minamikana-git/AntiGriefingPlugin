@@ -12,49 +12,44 @@ import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.plugin.java.JavaPlugin
-import java.io.File
 import java.util.*
 
 class AntiGriefingPlugin : JavaPlugin(), Listener {
-    private val trustedPlayers: Set<UUID> = HashSet()
+    private val trustedPlayers: MutableSet<UUID?> = HashSet<UUID?>()
     private var uuidManager: UUIDManager? = null
     private var fireBanReason: String? = null
     private var lavaBanReason: String? = null
     private var pluginEnabled = false
 
     override fun onEnable() {
-        if (!File(dataFolder, "config.yml").exists()) {
-            saveDefaultConfig()
+        // 設定ファイルの初期化
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs()
         }
+        saveDefaultConfig()
 
-        logger.info("copyright 2024 hotamachisubaru all rights reserved.")
-        logger.info("version " + description.version)
-        logger.info("author " + description.authors)
-        logger.info("development by hotamachisubaru")
-        logger.info("[!] チート対策プラグインを有効化しています。")
-        server.pluginManager.registerEvents(this, this)
-        registerCommands()
-        loadConfiguration()
+        // 設定値をロード
         fireBanReason =
-            config.getString("ban-reasons.fire", "火打ち石を使用してブロックを燃やそうとしたためBANされました。")
-        lavaBanReason = config.getString("ban-reasons.lava", "マグマを使用したためBANされました。")
+            getConfig().getString("ban-reasons.fire", "火打ち石を使用してブロックを燃やそうとしたためBANされました。")
+        lavaBanReason = getConfig().getString("ban-reasons.lava", "マグマを使用したためBANされました。")
+        pluginEnabled = getConfig().getBoolean("pluginEnabled", true)
 
-        val advancedBan = Bukkit.getPluginManager().getPlugin("AdvancedBan")
-        if (advancedBan != null && advancedBan.isEnabled) {
+        // AdvancedBanの確認
+        if (Bukkit.getPluginManager().isPluginEnabled("AdvancedBan")) {
             uuidManager = UUIDManager.get()
         } else {
-            logger.warning("AdvancedBan プラグインがないか無効化されています。")
-            server.pluginManager.disablePlugin(this)
+            getLogger().warning("AdvancedBan プラグインが見つからないか無効化されています。プラグインを無効化します。")
+            getServer().getPluginManager().disablePlugin(this)
+            return
         }
+
+        // イベントリスナーとコマンドの登録
+        getServer().getPluginManager().registerEvents(this, this)
+        registerCommands()
     }
 
     override fun onDisable() {
-        logger.info("[!] チート対策プラグインを無効化しています。")
-    }
-
-    private fun loadConfiguration() {
-        saveDefaultConfig()
-        pluginEnabled = config.getBoolean("pluginEnabled", true)
+        getLogger().info("荒らし対策プラグインを無効化しました。")
     }
 
     private fun registerCommands() {
@@ -64,18 +59,14 @@ class AntiGriefingPlugin : JavaPlugin(), Listener {
         getCommand("toggleantigrief")!!.setExecutor(commandHandler)
     }
 
-
     @EventHandler
     fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) {
         if (!pluginEnabled) return
 
-        val player = event.player
-        val block = event.block
-        val bucket = event.bucket
-
-        if (bucket == Material.LAVA_BUCKET) {
+        val player = event.getPlayer()
+        if (event.getBucket() == Material.LAVA_BUCKET) {
             punishPlayer(player, lavaBanReason)
-            event.isCancelled = true
+            event.setCancelled(true)
         }
     }
 
@@ -83,11 +74,11 @@ class AntiGriefingPlugin : JavaPlugin(), Listener {
     fun onBlockIgnite(event: BlockIgniteEvent) {
         if (!pluginEnabled) return
 
-        if (event.cause == IgniteCause.FLINT_AND_STEEL || event.cause == IgniteCause.LAVA) {
-            val player = event.player
+        if (event.getCause() == IgniteCause.FLINT_AND_STEEL || event.getCause() == IgniteCause.LAVA) {
+            val player = event.getPlayer()
             if (player != null) {
                 punishPlayer(player, fireBanReason)
-                event.isCancelled = true
+                event.setCancelled(true)
             }
         }
     }
@@ -95,8 +86,8 @@ class AntiGriefingPlugin : JavaPlugin(), Listener {
     private fun punishPlayer(player: Player, reason: String?) {
         if (uuidManager != null) {
             Punishment.create(
-                player.name,
-                uuidManager!!.getUUID(player.name),
+                player.getName(),
+                uuidManager!!.getUUID(player.getName()),
                 reason,
                 "CONSOLE",
                 PunishmentType.BAN,

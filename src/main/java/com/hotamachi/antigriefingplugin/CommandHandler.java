@@ -58,4 +58,5 @@ public class CommandHandler implements CommandExecutor {
         sender.sendMessage(ChatColor.GREEN + "荒らし対策プラグインが " + (pluginEnabled ? "有効" : "無効") + " になりました。");
         return true;
     }
+
 }
