@@ -55,7 +55,7 @@ public class CommandHandler implements CommandExecutor {
         pluginEnabled = !pluginEnabled;
         plugin.getConfig().set("pluginEnabled", pluginEnabled);
         plugin.saveConfig();
-        sender.sendMessage(ChatColor.GREEN + "荒らし対策プラグインが " + (pluginEnabled ? "有効" : "無効") + " になりました。");
+        sender.sendMessage(ChatColor.BLUE + "荒らし対策プラグインが " + (pluginEnabled ? "有効" : "無効") + " になりました。");
         return true;
     }
 
