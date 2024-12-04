@@ -1,6 +1,6 @@
 name: AntiGriefingPlugin
 version: '${project.version}'
-main: com.hotamachi.antigriefingplugin.AntiGriefingPlugin
+main: com.hotamachi.antigriefingplugin.AntigriefingPlugin
 api-version: 1.21
 author: hotamachisubaru 2024
 depend:
