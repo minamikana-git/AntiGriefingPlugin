@@ -17,12 +17,9 @@ worlds:
   world_nether:
     prevent-block-placement: true
     blocked-items:
-      - TNT
-      - TNT_MINECART
       - RESPAWN_ANCHOR
       - END_CRYSTAL
       - LAVA
-      - FIRE
       - LAVA_BUCKET
       - WATER_BUCKET
       - WATER
@@ -35,7 +32,6 @@ worlds:
       - LAVA
       - FIRE
       - LAVA_BUCKET
-      -
-ban-reasons:
-  fire: "火打ち石を使用してブロックを燃やそうとしたためBANされました。"
+  ban-reasons:
+  fire: "火打ち石を使用してブロックを燃やそうとしたためkickされました。"
   lava: "溶岩を使用したためBANされました。"
