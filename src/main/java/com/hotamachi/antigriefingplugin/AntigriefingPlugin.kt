@@ -22,6 +22,7 @@ class AntigriefingPlugin : JavaPlugin(), Listener {
     private var fireBanReason: String? = null
     private var lavaBanReason: String? = null
     private var pluginEnabled = false
+    private val logger: Logger = getLogger()
 
 
     override fun onEnable() {
@@ -46,8 +47,8 @@ class AntigriefingPlugin : JavaPlugin(), Listener {
     private fun loadSettings() {
         // 設定値をロード
         fireBanReason =
-            getConfig().getString("ban-reasons.fire", "火打ち石を使用してブロックを燃やそうとしたためBANされました。")
-        lavaBanReason = getConfig().getString("ban-reasons.lava", "マグマを使用したためBANされました。")
+            getConfig().getString("ban-reasons.fire")
+        lavaBanReason = getConfig().getString("ban-reasons.lava")
         pluginEnabled = getConfig().getBoolean("pluginEnabled", true)
     }
 
