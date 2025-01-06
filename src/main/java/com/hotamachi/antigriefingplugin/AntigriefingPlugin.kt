@@ -80,7 +80,7 @@ class AntigriefingPlugin : JavaPlugin(), Listener {
 
         val player = event.getPlayer()
         if (event.getBucket() == Material.LAVA_BUCKET) {
-            punishPlayer(player, lavaBanReason)
+            punishLavaPlayer(player, lavaBanReason)
             event.setCancelled(true)
         }
     }
@@ -92,13 +92,29 @@ class AntigriefingPlugin : JavaPlugin(), Listener {
         if (event.getCause() == IgniteCause.FLINT_AND_STEEL || event.getCause() == IgniteCause.LAVA) {
             val player = event.getPlayer()
             if (player != null) {
-                punishPlayer(player, fireBanReason)
+                punishFirePlayer(player, fireBanReason)
                 event.setCancelled(true)
             }
         }
     }
 
-    private fun punishPlayer(player: Player, reason: String?) {
+    private fun punishFirePlayer(player: Player, reason: String?) {
+        if (uuidManager != null) {
+            Punishment.create(
+                player.getName(),
+                uuidManager!!.getUUID(player.getName()),
+                reason,
+                "CONSOLE",
+                PunishmentType.KICK,
+                1800,
+                null,
+                false
+            )
+        }
+        player.kickPlayer(reason)
+    }
+
+    private fun punishLavaPlayer(player: Player, reason: String?) {
         if (uuidManager != null) {
             Punishment.create(
                 player.getName(),
@@ -111,7 +127,7 @@ class AntigriefingPlugin : JavaPlugin(), Listener {
                 false
             )
         }
-        player.kickPlayer(reason)
+        player.banPlayer(reason)
     }
 
     override fun onDisable() {
