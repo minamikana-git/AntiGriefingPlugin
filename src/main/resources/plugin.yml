@@ -2,9 +2,7 @@ name: AntiGriefingPlugin
 version: '${project.version}'
 main: com.hotamachi.antigriefingplugin.AntiGriefingPlugin
 api-version: 1.21
-author: hotamachisubaru 2024
-depend:
-  - AdvancedBan
+author: hotamachisubaru 2024-2025
 commands:
   reload:
     description: 設定ファイルをリロードします。
@@ -12,12 +10,14 @@ commands:
     permission: reload.permission
   world:
     description: 個別ワールド別に設定します。
-    usage: /toggleworld <world>
-    permission: toggleworld.permission
+    usage: /world <world>
+    permission: world.permission
   antigrief:
     description: ゲーム内でプラグインの有効化と無効化を切替します。
     usage: /antigrief
-  permissions:
+  baninfo:
+    description: 指定したプレイヤーが BAN されているかどうかを確認し、理由を表示します。
+    usage: /baninfo <playername>
   reload.permission:
     description: リロード権限
     default: op
