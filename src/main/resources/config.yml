@@ -1,5 +1,8 @@
 settings:
   enable-logging: true
+  pluginEnabled: true
+  max-breaks-per-second: 10
+  nuker-protection: true
 worlds:
   world:
     prevent-block-placement: true
@@ -35,3 +38,4 @@ worlds:
   ban-reasons:
   fire: "火打ち石を使用してブロックを燃やそうとしたためBANされました。"
   lava: "溶岩を使用したためBANされました。"
+  nuker: "Nukerの可能性があるためBANされました。"

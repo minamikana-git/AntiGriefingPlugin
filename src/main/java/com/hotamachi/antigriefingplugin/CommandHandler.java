@@ -25,21 +25,43 @@ public class CommandHandler implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof org.bukkit.command.ConsoleCommandSender) && !sender.hasPermission("antigrief.admin")) {
+            sender.sendMessage(Component.text("このコマンドを実行する権限がありません。")
+                    .style(style -> style.color(TextColor.color(0xFF5555))));
+            return true;
+        }
+
         switch (command.getName().toLowerCase()) {
             case "reload":
                 plugin.reloadConfig();
-                sender.sendMessage(Component.text("設定ファイルが再読み込みされました。").style(style -> style.color(net.kyori.adventure.text.format.TextColor.color(0x55FF55))));
+                sender.sendMessage(Component.text("設定ファイルが再読み込みされました。")
+                        .style(style -> style.color(TextColor.color(0x55FF55))));
                 return true;
             case "world":
                 return World(sender, args);
             case "antigrief":
-                return AntiGrief(sender);
+                if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
+                    sender.sendMessage(Component.text("使い方: /antigrief - プラグイン全体の有効/無効を切り替えます。")
+                            .style(style -> style.color(TextColor.color(0xFFFF55))));
+                    return true;
+                }
+                return togglePluginEnabled(sender);
             case "baninfo":
                 return BanInfo(sender, args);
+            case "antinuker":
+                if (args.length > 0 && args[0].equalsIgnoreCase("help")) {
+                    sender.sendMessage(Component.text("使い方: /antinuker - Nuker対策を有効/無効に切り替えます。")
+                            .style(style -> style.color(TextColor.color(0xFFFF55))));
+                    return true;
+                }
+                return toggleNukerProtection(sender);
             default:
+                sender.sendMessage(Component.text("不明なコマンドです。")
+                        .style(style -> style.color(TextColor.color(0xFF5555))));
                 return false;
         }
     }
+
 
     private boolean World(CommandSender sender, String[] args) {
         if (args.length != 1) {
@@ -61,14 +83,27 @@ public class CommandHandler implements CommandExecutor {
         return true;
     }
 
-    private boolean AntiGrief(CommandSender sender) {
+    private boolean toggleNukerProtection(CommandSender sender) {
+        boolean nukerProtection = plugin.getConfig().getBoolean("nuker-protection", true);
+        nukerProtection = !nukerProtection;
+        plugin.getConfig().set("nuker-protection", nukerProtection);
+        plugin.saveConfig();
+        sender.sendMessage(Component.text("Nuker対策が " + (nukerProtection ? "有効" : "無効") + " になりました。")
+                .style(style -> style.color(TextColor.color(0x55FF55))));
+        return true;
+    }
+
+    private boolean togglePluginEnabled(CommandSender sender) {
         boolean pluginEnabled = plugin.getConfig().getBoolean("pluginEnabled", true);
         pluginEnabled = !pluginEnabled;
         plugin.getConfig().set("pluginEnabled", pluginEnabled);
         plugin.saveConfig();
-        sender.sendMessage(Component.text("荒らし対策プラグインが " + (pluginEnabled ? "有効" : "無効") + " になりました。").style(style -> style.color(net.kyori.adventure.text.format.TextColor.color(0x55FF55))));
+        sender.sendMessage(Component.text("荒らし対策プラグインが " + (pluginEnabled ? "有効" : "無効") + " になりました。")
+                .style(style -> style.color(TextColor.color(0x55FF55))));
         return true;
     }
+
+
 
     private boolean BanInfo(CommandSender sender, String[] args) {
         if (args.length != 1) {

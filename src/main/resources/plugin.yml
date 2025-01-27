@@ -15,6 +15,9 @@ commands:
   antigrief:
     description: ゲーム内でプラグインの有効化と無効化を切替します。
     usage: /antigrief
+  antinuker:
+    description: nuker対策の有効化と無効化を切り替えします。
+    usage: /antinuker
   baninfo:
     description: 指定したプレイヤーが BAN されているかどうかを確認し、理由を表示します。
     usage: /baninfo <playername>

@@ -43,6 +43,9 @@ public class AntiGriefingPlugin extends JavaPlugin {
         return getConfig().getString("ban-reasons.lava", "マグマを使用したためBANされました。");
     }
 
+    public String getNukerBanReason(){
+        return getConfig().getString("ban-reason.nuker","Nukerの可能性があるためBANされました。");
+    }
     @Override
     public void onDisable() {
         logger.info("[!] チート対策プラグインを無効化しています。");
@@ -51,6 +54,7 @@ public class AntiGriefingPlugin extends JavaPlugin {
     private void loadConfiguration() {
         saveDefaultConfig();
         pluginEnabled = getConfig().getBoolean("pluginEnabled", true);
+
     }
 
     private void registerCommands() {
@@ -59,6 +63,7 @@ public class AntiGriefingPlugin extends JavaPlugin {
         getCommand("antigrief").setExecutor(commandHandler);
         getCommand("world").setExecutor(commandHandler);
         getCommand("baninfo").setExecutor(commandHandler);
+        getCommand("antinuker").setExecutor(commandHandler);
     }
 
     private void registerListeners() {
